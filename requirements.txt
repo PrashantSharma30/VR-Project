@@ -1,0 +1,12 @@
+
+streamlit
+torch
+torchvision
+transformers
+faiss-cpu
+ultralytics
+opencv-python-headless
+pillow
+matplotlib
+numpy
+huggingface_hub
