@@ -10,3 +10,4 @@ pillow
 matplotlib
 numpy
 huggingface_hub
+pi-heif
