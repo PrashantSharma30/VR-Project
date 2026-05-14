@@ -207,7 +207,6 @@ def load_all():
                 item["image_path"] = p
         
                 break
-        )
 
     return (
         device,
