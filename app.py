@@ -1,4 +1,3 @@
-
 import streamlit as st
 import torch
 import faiss
@@ -105,19 +104,6 @@ dataset_path, gallery_path = (
     setup_assets()
 )
 
-st.write("DATASET PATH:", dataset_path)
-
-st.write("GALLERY PATH:", gallery_path)
-
-for root, dirs, files in os.walk(gallery_path):
-
-    st.write(root)
-
-    st.write(files[:5])
-
-    break
-
-
 # =====================================================
 # PATHS
 # =====================================================
@@ -192,6 +178,25 @@ def load_all():
         metadata = pickle.load(f)
 
     # ---------------------------------------------
+    # BUILD IMAGE PATH MAP
+    # ---------------------------------------------
+
+    all_images = {}
+
+    for root, dirs, files in os.walk(gallery_path):
+
+        for file in files:
+
+            if file.lower().endswith(
+                (".jpg", ".jpeg", ".png")
+            ):
+
+                all_images[file] = os.path.join(
+                    root,
+                    file
+                )
+
+    # ---------------------------------------------
     # FIX IMAGE PATHS
     # ---------------------------------------------
 
@@ -199,27 +204,15 @@ def load_all():
 
         filename = item["image_name"]
 
-        possible_paths = [
-        
-            os.path.join(
-                gallery_path,
-                filename
-            ),
-        
-            os.path.join(
-                gallery_path,
-                "gallery",
-                filename
+        if filename in all_images:
+
+            item["image_path"] = (
+                all_images[filename]
             )
-        ]
-        
-        for p in possible_paths:
-        
-            if os.path.exists(p):
-        
-                item["image_path"] = p
-        
-                break
+
+        else:
+
+            item["image_path"] = None
 
     return (
         device,
@@ -392,12 +385,7 @@ if uploaded_file is not None:
         if selected_crop is not None:
 
             st.subheader(
-                "Selected Query"
-            )
-
-            st.image(
-                selected_crop,
-                width=300
+                "Retrieved Products"
             )
 
             inputs = clip_processor(
@@ -453,10 +441,6 @@ if uploaded_file is not None:
             # DISPLAY RESULTS
             # =========================================
 
-            st.subheader(
-                "Retrieved Products"
-            )
-
             result_cols = st.columns(
                 TOP_K
             )
@@ -467,49 +451,46 @@ if uploaded_file is not None:
 
                 item = metadata[idx]
 
-                try:
+                with result_cols[rank]:
 
-                    retrieved_img = Image.open(
-                        item["image_path"]
-                    ).convert("RGB")
+                    if item["image_path"] is not None:
 
-                    with result_cols[rank]:
+                        try:
 
-                        st.image(
-                            retrieved_img
-                        )
+                            retrieved_img = Image.open(
+                                item["image_path"]
+                            ).convert("RGB")
 
-                        st.write(
-                            f"Rank {rank+1}"
-                        )
-
-                        st.write(
-                            f"Score: {distances[0][rank]:.3f}"
-                        )
-
-                        st.caption(
-                            item.get(
-                                "caption",
-                                ""
+                            st.image(
+                                retrieved_img
                             )
-                        )
 
-                
-                except Exception as e:
-                
-                    with result_cols[rank]:
-                
+                            st.write(
+                                f"Rank {rank+1}"
+                            )
+
+                            st.write(
+                                f"Score: {distances[0][rank]:.3f}"
+                            )
+
+                            st.caption(
+                                item.get(
+                                    "caption",
+                                    ""
+                                )
+                            )
+
+                        except:
+
+                            st.write(
+                                "Could not load image"
+                            )
+
+                    else:
+
                         st.write(
                             "Image not found"
                         )
-                
-                        st.write(
-                            item["image_path"]
-                        )
-                
-                        st.write(str(e))
-
-
 
     else:
 
