@@ -105,6 +105,19 @@ dataset_path, gallery_path = (
     setup_assets()
 )
 
+st.write("DATASET PATH:", dataset_path)
+
+st.write("GALLERY PATH:", gallery_path)
+
+for root, dirs, files in os.walk(gallery_path):
+
+    st.write(root)
+
+    st.write(files[:5])
+
+    break
+
+
 # =====================================================
 # PATHS
 # =====================================================
@@ -481,13 +494,22 @@ if uploaded_file is not None:
                             )
                         )
 
-                except:
-
+                
+                except Exception as e:
+                
                     with result_cols[rank]:
-
+                
                         st.write(
                             "Image not found"
                         )
+                
+                        st.write(
+                            item["image_path"]
+                        )
+                
+                        st.write(str(e))
+
+
 
     else:
 
