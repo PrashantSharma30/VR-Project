@@ -186,9 +186,27 @@ def load_all():
 
         filename = item["image_name"]
 
-        item["image_path"] = os.path.join(
-            gallery_path,
-            filename
+        possible_paths = [
+        
+            os.path.join(
+                gallery_path,
+                filename
+            ),
+        
+            os.path.join(
+                gallery_path,
+                "gallery",
+                filename
+            )
+        ]
+        
+        for p in possible_paths:
+        
+            if os.path.exists(p):
+        
+                item["image_path"] = p
+        
+                break
         )
 
     return (
